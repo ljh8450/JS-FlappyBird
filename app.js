@@ -2,12 +2,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const grid = document.querySelector('.grid');
     const doodler = document.createElement('div');
     let doodlerLeftSpace = 50;
-    let doodlerBottomSpace = 150;
+    let startPoint = 150;
+    let doodlerBottomSpace = startPoint;
     let isGameOver = false;
     let platformCount = 5;
     let platforms = [];
-    let upTimerId
-    let downTimerId
+    let upTimerId;
+    let downTimerId;
+    let isJumping = true;
 
     function createDoodler() {
        grid.appendChild(doodler);
@@ -57,23 +59,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function jump() {
         clearInterval(downTimerId);
-        upTimerId = setInterval(() => {
+        isJumping = true;
+        upTimerId = setInterval(function () {
             doodlerBottomSpace += 20;
             doodler.style.bottom = doodlerBottomSpace + 'px';
-            if (doodlerBottomSpace > 350) {
-                fall()
+            if (doodlerBottomSpace > startPoint + 200) {
+                fall();
             }
         }, 30);
     }
 
     function fall() {
         clearInterval(upTimerId);
+        isJumping = false;
         downTimerId = setInterval(function () {
             doodlerBottomSpace -= 5;
             doodler.style.bottom = doodlerBottomSpace + 'px';
             if (doodlerBottomSpace <= 0){
-                gameOver()
+                gameOver();
             }
+            platforms.forEach(platform => {
+                if (
+                    (doodlerBottomSpace >= platform.bottom) &&
+                    (doodlerBottomSpace <= platform.bottom + 15) &&
+                    ((doodlerLeftSpace + 60) >= platform.left) &&
+                    (doodlerLeftSpace <= (platform.left + 85)) &&
+                    !isJumping
+                ) {
+                    console.log('landded');
+                    startPoint = doodlerBottomSpace;
+                    jump();
+                }
+            })
 
         }, 30)
     }
@@ -83,6 +100,16 @@ document.addEventListener('DOMContentLoaded', () => {
         isGameOver = true;
         clearInterval(upTimerId);
         clearInterval(downTimerId);
+    }
+
+    function colntrol(e) {
+        if (e.key == "ArrowLeft") {
+            //move Left
+        } else if (e.key == "ArrowRight") {
+            //move Right
+        } else if (e.key == "ArrowUp") {
+            //move Up
+        }
     }
 
     function start() {
