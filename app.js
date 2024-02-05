@@ -10,6 +10,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let upTimerId;
     let downTimerId;
     let isJumping = true;
+    let isGoingLeft = false;
+    let isGoingRight = false;
+    let leftTimerId;
+    let rightTimerId;
 
     function createDoodler() {
        grid.appendChild(doodler);
@@ -50,8 +54,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 platform.bottom -= 4;
                 let visual = platform.visual;
                 visual.style.bottom = platform.bottom + 'px';
-                if (doodlerBottomSpace > 350){
-                    fall;
+                
+                if (platform.bottom < 10){
+                    let firstPlatform = platforms[0].visual;
+                    firstPlatform.classList.remove('platform');
+                    platforms.shift();
+                    console.log(platforms);
+                    let newPlatform = new Platform(600);
+                    platforms.push(newPlatform);
                 }
             });
         }
@@ -100,16 +110,53 @@ document.addEventListener('DOMContentLoaded', () => {
         isGameOver = true;
         clearInterval(upTimerId);
         clearInterval(downTimerId);
+        clearInterval(leftTimerId);
+        clearInterval(rightTimerId);
     }
 
     function colntrol(e) {
         if (e.key == "ArrowLeft") {
-            //move Left
+            moveLeft();
         } else if (e.key == "ArrowRight") {
-            //move Right
+            moveRight();
         } else if (e.key == "ArrowUp") {
-            //move Up
+            moveStraight();
         }
+    }
+
+    function moveLeft() {
+        if (isGoingRight) {
+            clearInterval(rightTimerId);
+            isGoingLeft = false;
+        }
+        isGoingLeft = true;
+        leftTimerId = setInterval(function () {
+            if (doodlerLeftSpace >= 0) {
+                doodlerLeftSpace -= 5;
+                doodler.style.left = doodlerLeftSpace + 'px';
+            } else moveRight();
+        }, 20);
+    }
+
+    function moveRight() {
+        if (isGoingLeft) {
+            clearInterval(leftTimerId);
+            isGoingLeft = false;
+        }
+        isGoingRight = true;
+        rightTimerId = setInterval(function () {    
+            if (doodlerLeftSpace <= 340) {
+                doodlerLeftSpace += 5;
+                doodler.style.left = doodlerLeftSpace + 'px';
+            } else moveLeft();
+        }, 20);
+    }
+
+    function moveStraight() {
+        isGoingRight = false;
+        isGoingLeft = false;
+        clearInterval(rightTimerId);
+        clearInterval(leftTimerId);
     }
 
     function start() {
@@ -118,6 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
             createDoodler();
             setInterval(movePlatforms, 30);
             jump();
+            document.addEventListener('keyup', colntrol);
         }
     }
     //attach to button
